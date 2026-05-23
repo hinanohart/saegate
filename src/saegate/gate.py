@@ -165,8 +165,10 @@ class Gate:
                     detail="caller did not assert sandboxed=True",
                 )
             ]
-            if verdict == Verdict.ALLOW:
-                verdict = Verdict.ESCALATE
+            # Sandbox absence is the fail-closed signal; normalize all verdicts
+            # to ESCALATE so a host that special-cases `deny` (e.g. "block this
+            # tool only") cannot accidentally bypass a missing-sandbox event.
+            verdict = Verdict.ESCALATE
 
         return self._build_decision(
             verdict=verdict,

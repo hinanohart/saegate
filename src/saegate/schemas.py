@@ -40,9 +40,16 @@ class ToolCall(BaseModel):
 
     @field_validator("name")
     @classmethod
-    def _name_no_newlines(cls, v: str) -> str:
-        if "\n" in v or "\r" in v:
-            raise ValueError("tool name must not contain newlines")
+    def _name_no_control_chars(cls, v: str) -> str:
+        # Reject all C0 controls (0x00–0x1F) and DEL (0x7F). The inspector
+        # prompt embeds `name` inside an XML-style attribute; control chars
+        # would either corrupt that frame (NUL splicing the token), or sneak
+        # through logging / JSONL telemetry as binary noise.
+        for ch in v:
+            if ord(ch) < 0x20 or ord(ch) == 0x7F:
+                raise ValueError(
+                    f"tool name must not contain control characters (got 0x{ord(ch):02X})"
+                )
         return v
 
 

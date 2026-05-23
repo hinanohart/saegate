@@ -20,11 +20,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import structlog
+
 from saegate.features import FeatureCatalog, load_catalog
 from saegate.gate import Gate, GateConfig
 from saegate.policy import load_policy
 from saegate.probe import MockProbe, ProbeConfig, SAEProbe
 from saegate.schemas import Decision, Draft, ToolCall
+
+log = structlog.get_logger("saegate.mcp")
 
 
 @dataclass
@@ -44,6 +48,16 @@ def build_gate(server_cfg: ServerConfig) -> tuple[Gate, FeatureCatalog | None]:
         catalog = load_catalog(server_cfg.catalog_path)
     probe_cfg = ProbeConfig()
     probe = MockProbe(probe_cfg) if server_cfg.use_mock_probe else SAEProbe(probe_cfg)
+    # Warn (do not fail) when catalog.layer disagrees with probe sae_layer:
+    # a layer 19 catalog used against a layer 25 probe will silently mis-label
+    # activations otherwise. Non-fatal because users may run with a future
+    # multi-layer probe and the catalog convention is still emergent.
+    if catalog is not None and catalog.layer and catalog.layer != probe_cfg.sae_layer:
+        log.warning(
+            "mcp.catalog_layer_mismatch",
+            catalog_layer=catalog.layer,
+            probe_layer=probe_cfg.sae_layer,
+        )
     gate_cfg = GateConfig(
         sandbox_required=server_cfg.sandbox_required,
         use_mock_probe=server_cfg.use_mock_probe,
@@ -84,6 +98,9 @@ def handle_list_features(catalog: FeatureCatalog | None) -> dict[str, Any]:
 
 
 def handle_explain_decision(gate: Gate, payload: dict[str, Any]) -> str:
+    """Render a human-readable explanation. Non-gating: errors are surfaced
+    by the caller's `try/except` (see `serve_stdio_json` and `_call_tool`),
+    not as ESCALATE Decisions."""
     decision = Decision.model_validate(payload)
     return gate.explain(decision)
 

@@ -18,6 +18,7 @@ License note:
 
 from __future__ import annotations
 
+import hashlib
 import importlib
 import time
 from collections.abc import Sequence
@@ -220,7 +221,11 @@ class SAEProbe:
 class MockProbe:
     """Deterministic, CPU-only probe for tests and CI.
 
-    Returns activations as a hash-derived float in [0, 1] per (prompt, feature_id).
+    Returns activations as a sha256-derived float in [0, 1) per (prompt,
+    feature_id). The activation is stable across processes, machines, and
+    Python versions — unlike Python's built-in `hash()`, which is salted per
+    process when `PYTHONHASHSEED` is left at its default `random` value.
+
     NOT a real SAE. Production callers must use SAEProbe.
     """
 
@@ -243,7 +248,8 @@ class MockProbe:
         for fid in feature_ids:
             if fid < 0:
                 raise ProbeRuntimeError(f"feature_id {fid} must be >= 0")
-            seed = hash((prompt, int(fid))) & 0xFFFFFFFF
+            digest = hashlib.sha256(f"{prompt}|{int(fid)}".encode()).digest()
+            seed = int.from_bytes(digest[:4], "big")
             out[int(fid)] = (seed % 1000) / 1000.0
         elapsed_ms = (time.monotonic() - t0) * 1000.0
         n_tokens = min(len(prompt.split()), self.config.max_tokens)

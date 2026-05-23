@@ -16,6 +16,70 @@ Versioning: [PEP 440](https://peps.python.org/pep-0440/).
 - v1.0: `SAEBench-Gate` eval suite; `subjunctor` PRM cross-link;
   paper-style README; arXiv preprint draft.
 
+## [0.0.1.post2] - 2026-05-24
+
+Second hardening pass (synthesizes three independent post-post1 audits:
+architect compliance / critic deep-flaw probe / verifier finding-trace).
+No breaking API change.
+
+### Fixed
+- `MockProbe` now uses `hashlib.sha256` instead of Python's built-in
+  `hash()`. With `PYTHONHASHSEED=random` (the default for `python3`),
+  `hash()` is salted per process and the mock probe was therefore
+  **not** cross-process deterministic, contradicting its own docstring
+  and the README's "deterministic CI" claim. Activations are now stable
+  across processes, machines, and Python versions. New regression test
+  `test_mock_probe_is_cross_process_deterministic` pins this via
+  `subprocess.run`.
+- `Gate.check` sandbox-absence handling now normalizes **every** verdict
+  (including a strict-mode `deny`) to `escalate`, not just `allow`.
+  Sandbox absence is the strongest fail-closed signal — a host that
+  special-cases `deny` ("block this tool only") could previously miss
+  it. New test `test_sandbox_required_demotes_deny_to_escalate` covers
+  the strict+deny case.
+- `ToolCall.name` validator now rejects all C0 control characters
+  (0x00–0x1F) and DEL (0x7F), not just `\n`/`\r`. A NUL byte in the
+  tool name could splice tokens inside the inspector's XML attribute
+  frame and corrupt JSONL telemetry. Old behavior accepted those bytes
+  silently. New test `test_tool_name_rejects_control_chars`.
+
+### Added
+- `tests/test_smoke.py::test_policy_strict_mode_keeps_deny_when_sandboxed`
+  — strict mode + sandbox satisfied path was implemented but had no
+  dedicated test (caught by deep-flaw audit).
+- `mcp_server.build_gate` now logs a `catalog_layer_mismatch` warning
+  when the catalog's `layer` disagrees with the probe's `sae_layer`.
+  Non-fatal because multi-layer probes are still emergent.
+- README OpenHands wiring now includes a concrete `config.toml` MCP
+  stdio snippet (previously prose-only).
+
+### Documented
+- Dependency upper-bound loosening rationale for v0.0.1: the architecture
+  spec pinned `structlog<25`, `transformer-lens==2.9.*`, `sae-lens==5.5.*`,
+  but the build environment shipped `structlog 25.5.0` system-wide. The
+  pins were widened to `structlog<26`, `transformer-lens>=2.9,<3`,
+  `sae-lens>=5.5,<6` so the package installs cleanly. v0.1.0 will
+  re-tighten after the calibration eval is run against pinned versions.
+- `mcp_server.handle_explain_decision` docstring now explicitly states it
+  is non-gating; errors surface as JSON-error responses, not ESCALATE
+  Decisions (the gate path remains the only fail-closed surface).
+
+### Not changed (deferred)
+- JSON-quote double-escape inside the inspector prompt (critic M-3,
+  MEDIUM): switching to a CDATA / base64 envelope for `tool_args` would
+  change the rendered prompt structure. Defer to v0.1.0 where the
+  calibration eval can pin the inspector LM's behavior on both layouts.
+- `check_no_secrets.sh` README/SECURITY whole-file exclusion replaced
+  with marker-based gating: low real-world risk (manual review of the
+  two affected files in PR reviews), and the marker scheme touches the
+  pre-commit and CI surface. Defer to v0.1.0 alongside other gate
+  refactors.
+- Quickstart contrasting allow-vs-escalate demo (verifier B-MAJ-3
+  partial): honesty gap is closed (`README` already says escalate is
+  the expected wiring-test result with placeholder feature IDs); UX gap
+  remains. Defer to v0.1.0 where the calibrated catalog can ship at
+  least one real escalation path.
+
 ## [0.0.1.post1] - 2026-05-23
 
 Honest-marketing patch (synthesizes three independent post-Phase-0 audits:

@@ -153,8 +153,17 @@ Add to `.cursor/mcp.json`:
 
 ### OpenHands / opencode / aider
 
-Any MCP-speaking host can launch `saegate serve <policy>` as a stdio child
-process. The wire-format is fixed by `saegate.schemas.Decision`.
+For OpenHands, register saegate in `config.toml`:
+
+```toml
+[mcp]
+stdio_servers = [
+    { name = "saegate", command = "saegate", args = ["serve", "/abs/path/to/policy.yaml", "--catalog", "/abs/path/to/catalog.yaml", "--mock"] }
+]
+```
+
+For other MCP-speaking hosts, launch `saegate serve <policy>` as a stdio
+child process. The wire-format is fixed by `saegate.schemas.Decision`.
 
 ### Host-side pseudocode
 

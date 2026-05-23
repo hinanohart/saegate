@@ -69,6 +69,33 @@ def test_mock_probe_is_deterministic() -> None:
     assert a.mock is True
 
 
+def test_mock_probe_is_cross_process_deterministic() -> None:
+    """`hash()` is salted per process by default. We rely on sha256 instead,
+    so activations must reproduce in a fresh subprocess (regression for the
+    `hash()`-based v0.0.1.post1 implementation)."""
+    import subprocess
+    import sys
+
+    script = (
+        "from saegate.probe import MockProbe, ProbeConfig;"
+        "p = MockProbe(ProbeConfig()); p.load();"
+        "r = p.activations('cross-process determinism check', [1, 7, 42]);"
+        "print(';'.join(f'{k}={round(v, 6)}' for k, v in sorted(r.activations.items())))"
+    )
+    runs = []
+    for _ in range(3):
+        out = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=".",
+            env={"PYTHONPATH": "src", "PYTHONHASHSEED": "random"},
+        ).stdout.strip()
+        runs.append(out)
+    assert runs[0] == runs[1] == runs[2], f"non-deterministic across runs: {runs}"
+
+
 # ---------------------------------------------------------------------------
 # 2. Allow path: no rule triggers when thresholds are unreachable
 # ---------------------------------------------------------------------------
@@ -257,6 +284,59 @@ def test_sandbox_required_demotes_allow_to_escalate() -> None:
     assert decision_no_sandbox.verdict == Verdict.ESCALATE
     assert any(r.code == ReasonCode.SANDBOX_REQUIRED for r in decision_no_sandbox.reasons)
     assert decision_sandbox.verdict == Verdict.ALLOW
+
+
+def test_sandbox_required_demotes_deny_to_escalate() -> None:
+    """Sandbox absence is the fail-closed signal; even a strict-mode DENY
+    must normalize to ESCALATE so a host that special-cases `deny` (e.g.
+    "block this tool only") cannot inadvertently miss the sandbox event."""
+    strict_deny_policy = policy_from_dict(
+        {
+            "version": 1,
+            "mode": "strict",
+            "rules": [{"feature_id": 11, "label": "watch", "threshold": 0.0, "on_trigger": "deny"}],
+        }
+    )
+    gate = Gate(
+        policy=strict_deny_policy,
+        probe=MockProbe(),
+        config=GateConfig(use_mock_probe=True, sandbox_required=True),
+    )
+    decision = gate.check(
+        ToolCall(name="write_file", arguments={"path": "x"}),
+        sandboxed=False,
+    )
+    assert decision.verdict == Verdict.ESCALATE
+    codes = {r.code for r in decision.reasons}
+    assert ReasonCode.SANDBOX_REQUIRED in codes
+
+
+def test_policy_strict_mode_keeps_deny_when_sandboxed() -> None:
+    """In strict mode with sandbox satisfied, a triggered deny rule yields
+    Verdict.DENY (the advisory deny opt-in path)."""
+    strict_deny_policy = policy_from_dict(
+        {
+            "version": 1,
+            "mode": "strict",
+            "rules": [{"feature_id": 11, "label": "watch", "threshold": 0.0, "on_trigger": "deny"}],
+        }
+    )
+    gate = Gate(
+        policy=strict_deny_policy,
+        probe=MockProbe(),
+        config=GateConfig(use_mock_probe=True, sandbox_required=False),
+    )
+    decision = gate.check(ToolCall(name="bash", arguments={"cmd": "ls"}))
+    assert decision.verdict == Verdict.DENY
+
+
+def test_tool_name_rejects_control_chars() -> None:
+    """ToolCall.name must reject C0 controls and DEL — they would either
+    corrupt the inspector XML attribute (NUL splicing the token) or sneak
+    through logs / JSONL telemetry as binary noise."""
+    for bad in ("\x00", "\t", "\x0b", "\x7f"):
+        with pytest.raises(ValueError):
+            ToolCall(name=f"bash{bad}fake")
 
 
 # ---------------------------------------------------------------------------
