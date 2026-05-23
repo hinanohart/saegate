@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      - id: no-secrets
+        name: no-secrets (grep gate)
+        entry: bash scripts/check_no_secrets.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: honest-marketing
+        name: honest-marketing (NG word gate)
+        entry: python scripts/honest_marketing_gate.py
+        language: system
+        files: '\.(md|yaml|yml|txt)$'
+        stages: [pre-commit]
+
+      - id: ruff-check
+        name: ruff (lint)
+        entry: ruff check src tests
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: ruff-format
+        name: ruff (format check)
+        entry: ruff format --check src tests
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]

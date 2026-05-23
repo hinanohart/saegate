@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "saegate"
+version = "0.0.1"
+description = "Advisory MCP gate that probes coding-agent tool-calls via a Llama-3.1-8B SAE inspector. Observation only, fail-closed escalate, sandbox required."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "Apache-2.0" }
+authors = [{ name = "hinanohart" }]
+keywords = [
+    "mcp",
+    "sparse-autoencoder",
+    "mechanistic-interpretability",
+    "coding-agent",
+    "safety-gate",
+    "llama",
+    "advisory",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+]
+dependencies = [
+    "pydantic>=2.8,<3",
+    "pyyaml>=6,<7",
+    "typer>=0.12,<1",
+    "structlog>=24.4,<26",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2,<2"]
+inference = [
+    "torch>=2.4,<2.7",
+    "transformers>=4.46,<4.51",
+    "transformer-lens>=2.9,<3",
+    "sae-lens>=5.5,<6",
+]
+dev = [
+    "pytest>=8,<9",
+    "pytest-asyncio>=0.24,<0.25",
+    "ruff>=0.7,<0.9",
+    "mypy>=1.13,<2",
+    "hypothesis>=6.115,<7",
+]
+
+[project.scripts]
+saegate = "saegate.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/hinanohart/saegate"
+Issues = "https://github.com/hinanohart/saegate/issues"
+Source = "https://github.com/hinanohart/saegate"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/saegate"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "PTH"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B011"]
+"src/saegate/cli.py" = ["B008"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "gpu: marks tests that require GPU",
+    "inference: marks tests requiring [inference] extras",
+]

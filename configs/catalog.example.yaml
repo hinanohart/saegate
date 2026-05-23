@@ -1,0 +1,22 @@
+# Example feature catalog skeleton.
+#
+# A catalog declares candidate SAE features available for policies to draw
+# from. saegate ships zero opinionated entries — populate this file from your
+# own labelling pass (Goodfire feature explorer, Neuronpedia, or manual review).
+#
+# `sae_model_id` and `layer` must match the SAE loaded by the probe.
+
+sae_model_id: Goodfire/Llama-3.1-8B-Instruct-SAE-l19
+layer: 19
+entries:
+  - feature_id: 0
+    label: "PLACEHOLDER"
+    source: "manual"
+    suggested_threshold: 0.5
+    note: |
+      Replace with a real feature ID and human-readable label.
+  - feature_id: 1
+    label: "PLACEHOLDER"
+    source: "manual"
+    suggested_threshold: 0.5
+    note: "Template only."

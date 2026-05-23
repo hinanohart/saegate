@@ -1,0 +1,29 @@
+# Example saegate policy.
+#
+# This file ships zero hardcoded feature IDs — the placeholders below are
+# illustrative only. Replace them with feature IDs from your own labelling
+# pass on Goodfire/Llama-3.1-8B-Instruct-SAE-l19 (or another SAE you load).
+#
+# Feature labels are advisory hints; they do not change runtime behavior.
+# Thresholds are SAE-, layer-, and prompt-distribution specific. Calibrate on
+# a held-out scenario set before relying on them in CI.
+
+version: 1
+mode: advisory  # "advisory" never returns deny — only allow or escalate.
+description: |
+  Placeholder advisory policy. Replace feature_ids below with IDs you have
+  empirically validated for your tool-call distribution.
+
+rules:
+  - feature_id: 0
+    label: "PLACEHOLDER — replace with a calibrated feature id"
+    threshold: 0.8
+    on_trigger: escalate
+    note: |
+      This rule never triggers in normal use (threshold high, ID nominal).
+      Documented as a template, not a recommendation.
+  - feature_id: 1
+    label: "PLACEHOLDER — replace with a calibrated feature id"
+    threshold: 0.8
+    on_trigger: escalate
+    note: "Template only."

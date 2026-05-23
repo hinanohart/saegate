@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use saegate in academic work, please cite it as below."
+title: "saegate: advisory MCP gate via SAE inspector"
+abstract: >
+  An advisory MCP gate that probes coding-agent tool-calls via a
+  Llama-3.1-8B SAE inspector. Observation only, fail-closed escalate,
+  sandbox required. saegate is a behavioral surrogate and is not a
+  security boundary on its own.
+type: software
+license: Apache-2.0
+version: "0.0.1"
+date-released: 2026-05-23
+authors:
+  - alias: hinanohart
+repository-code: "https://github.com/hinanohart/saegate"
+url: "https://github.com/hinanohart/saegate"
+keywords:
+  - sparse-autoencoder
+  - mechanistic-interpretability
+  - model-context-protocol
+  - coding-agent
+  - advisory-gate
+  - llama-3.1
+preferred-citation:
+  type: software
+  title: "saegate"
+  authors:
+    - alias: hinanohart
+  year: 2026
+  url: "https://github.com/hinanohart/saegate"
