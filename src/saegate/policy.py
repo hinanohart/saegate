@@ -49,7 +49,18 @@ class FeatureRule:
 
 @dataclass
 class Policy:
-    """A loaded policy with rules and global config."""
+    """A loaded policy with rules and global config.
+
+    Modes:
+        advisory (default): triggered rules with `on_trigger: deny` are
+            demoted to `escalate`. The gate therefore returns only
+            `allow` or `escalate`.
+        strict: rule verdicts are kept as written. A rule with
+            `on_trigger: deny` returns `deny` when matched. Hosts that
+            consume `deny` MUST still treat it as advisory.
+
+    `allow` is never a valid `on_trigger` (caught at YAML load time).
+    """
 
     version: int = DEFAULT_POLICY_VERSION
     mode: str = "advisory"  # "advisory" | "strict"

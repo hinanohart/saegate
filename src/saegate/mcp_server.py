@@ -7,7 +7,9 @@ Tools:
 
 The `mcp` package is optional. If it is not installed, this module exposes a
 plain `serve_stdio_json(...)` fallback that speaks newline-delimited JSON over
-stdin/stdout. This keeps the CLI usable without the full MCP stack.
+stdin/stdout. The fallback is a **diagnosis aid** — it is NOT an MCP-spec
+wire format. Production hosts should install `saegate[mcp]` and use the real
+MCP stdio path via `serve_mcp(...)`.
 """
 
 from __future__ import annotations

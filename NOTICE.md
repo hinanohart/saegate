@@ -11,11 +11,13 @@ upstream license.
 ### Default inspector LM and SAE
 
 - `meta-llama/Llama-3.1-8B-Instruct` — governed by the
-  **LLAMA 3.1 COMMUNITY LICENSE** (Meta). See
-  <https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct>.
+  **LLAMA 3.1 COMMUNITY LICENSE** (Meta). License source:
+  <https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/blob/main/LICENSE>
+  (verified 2026-05-23).
 - `Goodfire/Llama-3.1-8B-Instruct-SAE-l19` — derives from Llama 3.1 and
-  inherits the same license. See
-  <https://huggingface.co/Goodfire/Llama-3.1-8B-Instruct-SAE-l19>.
+  inherits the same license. Hub page:
+  <https://huggingface.co/Goodfire/Llama-3.1-8B-Instruct-SAE-l19>
+  (verified 2026-05-23).
 
 By installing `saegate[inference]` and loading these artifacts you accept
 the LLAMA 3.1 COMMUNITY LICENSE at the Hugging Face Hub download step.

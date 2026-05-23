@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "saegate"
-version = "0.0.1"
+version = "0.0.1.post1"
 description = "Advisory MCP gate that probes coding-agent tool-calls via a Llama-3.1-8B SAE inspector. Observation only, fail-closed escalate, sandbox required."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"

@@ -19,7 +19,9 @@ executing a tool-call. The gate:
 3. Reads the residual stream at layer 19 via a **sparse autoencoder**
    (`Goodfire/Llama-3.1-8B-Instruct-SAE-l19`).
 4. Compares per-feature activations against a user-supplied YAML policy.
-5. Returns `allow | escalate | deny` with a reasoning trace.
+5. Returns `allow | escalate` — or `deny`, only if your policy opts in
+   explicitly (`mode: strict` plus a rule with `on_trigger: deny`). In the
+   default `mode: advisory`, deny is auto-demoted to escalate.
 
 The host decides whether to honor the verdict. saegate never blocks anything
 on its own.
@@ -55,10 +57,16 @@ on its own.
 `v0.0.1` Phase 0 scaffold (2026-05-23):
 
 - Schemas, gate, policy, mock probe, MCP stdio server, CLI — all working CPU-only.
-- 7+ smoke tests + latency overhead bench + MCP roundtrip test.
+- 28 pytest tests covering allow / escalate / fail-closed (load /
+  runtime / timeout) / sandbox / JSON round-trip / policy validation /
+  telemetry / latency overhead / MCP roundtrip / prompt-injection escape.
 - Honest-marketing gate + secret-pattern gate + ruff/format CI.
 - **Real SAE inference and a calibrated feature catalog are not in v0.0.1.**
   They land in v0.1.0 once GPU-side validation is done.
+- **Latency targets are unverified on real inference.** The architecture pins
+  a p95 budget of 500 ms with a 700 ms hard timeout; v0.0.1 only verifies
+  gate overhead with the mock probe (< 100 ms). Real-GPU benchmarks land in
+  v0.1.0.
 
 See [CHANGELOG.md](CHANGELOG.md) for the roadmap to v0.1.0+.
 
@@ -76,6 +84,9 @@ pip install -e '.[inference]'
 
 # Developer install
 pip install -e '.[dev]'
+
+# Enable local pre-commit hooks (recommended for contributors)
+pip install pre-commit && pre-commit install
 ```
 
 ## Quickstart (mock mode, CPU)
@@ -94,12 +105,58 @@ saegate probe-once \
 saegate serve configs/policy.example.yaml --catalog configs/catalog.example.yaml --mock
 ```
 
-The shipped example policy and catalog use **placeholder feature IDs**. They
-are templates for shape, not recommendations.
+The shipped example policy and catalog use **placeholder feature IDs** with
+threshold `0.8`. With the deterministic `MockProbe` they usually return
+`escalate` (sandbox-required default) — the value is the wiring path, not
+the verdict content. Calibrate against real activations before drawing any
+conclusions from a verdict.
 
 ## Wiring into a host
 
-Pseudo-code, host-side:
+### Claude Code
+
+Add to your Claude Code MCP config (`~/.claude/mcp.json` or per-project
+`.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "saegate": {
+      "command": "saegate",
+      "args": [
+        "serve",
+        "/abs/path/to/policy.yaml",
+        "--catalog", "/abs/path/to/catalog.yaml",
+        "--mock"
+      ]
+    }
+  }
+}
+```
+
+Then call `gate_check` from the host before executing a tool-call.
+
+### Cursor
+
+Add to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "saegate": {
+      "command": "saegate",
+      "args": ["serve", "/abs/path/to/policy.yaml", "--mock"]
+    }
+  }
+}
+```
+
+### OpenHands / opencode / aider
+
+Any MCP-speaking host can launch `saegate serve <policy>` as a stdio child
+process. The wire-format is fixed by `saegate.schemas.Decision`.
+
+### Host-side pseudocode
 
 ```python
 async def before_tool_call(tool_name, args, draft):
@@ -109,14 +166,12 @@ async def before_tool_call(tool_name, args, draft):
         "draft_text": draft,
         "sandboxed": True,
     })
-    if result["verdict"] == "escalate":
-        await ask_human(result)
-    elif result["verdict"] == "deny":
+    if result["verdict"] in ("escalate", "deny"):
         await ask_human(result)  # advisory: host still chooses
 ```
 
-The Decision JSON shape is fixed by `saegate.schemas.Decision`. A wire-format
-test in `tests/test_smoke.py::test_decision_json_round_trip` pins this.
+A wire-format test in `tests/test_smoke.py::test_decision_json_round_trip`
+pins the Decision JSON shape.
 
 ## Policy schema
 
