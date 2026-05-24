@@ -46,10 +46,10 @@ inference = [
     "sae-lens>=5.5,<6",
 ]
 dev = [
-    "pytest>=8,<9",
-    "pytest-asyncio>=0.24,<0.25",
-    "ruff>=0.7,<0.9",
-    "mypy>=1.13,<2",
+    "pytest>=8,<10",
+    "pytest-asyncio>=0.24,<1.4",
+    "ruff>=0.7,<0.16",
+    "mypy>=1.13,<3",
     "hypothesis>=6.115,<7",
 ]
 
