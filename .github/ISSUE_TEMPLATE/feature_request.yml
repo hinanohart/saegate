@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest a new capability or wiring path
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        saegate scope: **advisory observation gate** for coding-agent tool-calls
+        via SAE inspector. Out of scope: enforcement (host's job), retraining
+        the inspector LM, replacing host-level RBAC.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't you currently do, or what is awkward to express?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: |
+        A concrete API / config / CLI shape. Reference existing modules
+        (probe / gate / policy / mcp_server) where applicable.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider, and why are they worse?
+
+  - type: checkboxes
+    id: scope_check
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: I have read `docs/limitations.md` and my request is in-scope.
+          required: true

@@ -1,0 +1,56 @@
+name: Bug report
+description: Something is not behaving as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: saegate is **advisory** — a `verdict` is not enforcement.
+        If your host is acting on a verdict it should have ignored, that is a
+        host-side issue, not a saegate bug. See `docs/limitations.md`.
+
+  - type: input
+    id: version
+    attributes:
+      label: saegate version
+      description: Output of `saegate version` (or pip show saegate)
+      placeholder: "0.0.1.post2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: probe
+    attributes:
+      label: Probe mode
+      options:
+        - MockProbe (CPU, deterministic)
+        - SAEProbe (real Llama-3.1-8B + Goodfire SAE on GPU)
+        - SAEProbe with a custom SAE artifact
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: |
+        Smallest policy YAML + tool_call JSON + observed Decision JSON that
+        shows the bug. Include the exact `verdict` and `reasons[].code`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What verdict / reasoning trace did you expect, and why?
+    validations:
+      required: true
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python version, GPU (if any), MCP host (Claude Code / Cursor / OpenHands / other)
+    validations:
+      required: true
