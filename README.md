@@ -3,7 +3,7 @@
 > An advisory MCP gate that probes coding-agent tool-calls via a Llama-3.1-8B SAE inspector — observation only, fail-closed escalate, sandbox required.
 
 [![CI](https://github.com/hinanohart/saegate/actions/workflows/ci.yml/badge.svg)](https://github.com/hinanohart/saegate/actions/workflows/ci.yml)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 ---
@@ -200,7 +200,7 @@ See `configs/policy.example.yaml`.
 
 ## License
 
-- This repository: Apache 2.0 (see [LICENSE](LICENSE)).
+- This repository: MIT (see [LICENSE](LICENSE)).
 - The default SAE artifact `Goodfire/Llama-3.1-8B-Instruct-SAE-l19` is built
   on Meta's Llama 3.1 and inherits the **LLAMA 3.1 COMMUNITY LICENSE**. By
   using the default `inference` extras you accept that license at download

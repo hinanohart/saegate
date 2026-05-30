@@ -8,7 +8,7 @@ version = "0.0.1.post2"
 description = "Advisory MCP gate that probes coding-agent tool-calls via a Llama-3.1-8B SAE inspector. Observation only, fail-closed escalate, sandbox required."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
-license = { text = "Apache-2.0" }
+license = { text = "MIT" }
 authors = [{ name = "hinanohart" }]
 keywords = [
     "mcp",
@@ -21,7 +21,7 @@ keywords = [
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
