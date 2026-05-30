@@ -7,7 +7,7 @@ abstract: >
   sandbox required. saegate is a behavioral surrogate and is not a
   security boundary on its own.
 type: software
-license: Apache-2.0
+license: MIT
 version: "0.0.1"
 date-released: 2026-05-23
 authors:

@@ -1,6 +1,6 @@
 # NOTICE
 
-`saegate` source code is licensed under Apache 2.0 (see `LICENSE`).
+`saegate` source code is licensed under the MIT License (see `LICENSE`).
 
 ## Third-party model artifacts
 
