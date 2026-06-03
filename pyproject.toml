@@ -47,7 +47,7 @@ inference = [
 ]
 dev = [
     "pytest>=8,<10",
-    "pytest-asyncio>=0.24,<1.4",
+    "pytest-asyncio>=0.24,<1.5",
     "ruff>=0.7,<0.16",
     "mypy>=1.13,<3",
     "hypothesis>=6.115,<7",
