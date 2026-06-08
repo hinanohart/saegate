@@ -34,7 +34,7 @@ dependencies = [
     "pydantic>=2.8,<3",
     "pyyaml>=6,<7",
     "typer>=0.12,<1",
-    "structlog>=24.4,<26",
+    "structlog>=24.4,<27",
 ]
 
 [project.optional-dependencies]
