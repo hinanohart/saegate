@@ -14,27 +14,9 @@
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    Agent["Coding Agent<br>Claude Code / Cursor / OpenHands"]
-    MCP["MCP Server<br>saegate serve"]
-    Gate["Gate<br>gate.py"]
-    Probe["SAE Probe<br>probe.py"]
-    InspectorLM["Inspector LM<br>Llama-3.1-8B-Instruct"]
-    SAE["Sparse Autoencoder<br>Goodfire SAE l19"]
-    Policy["Policy Evaluator<br>policy.py"]
-    Decision["Decision<br>allow / escalate / deny"]
-    Host["Host Action<br>Host enforces or escalates"]
-
-    Agent -->|"gate_check(tool_name, args, draft)"| MCP
-    MCP --> Gate
-    Gate -->|"render_inspector_prompt"| Probe
-    Probe --> InspectorLM
-    InspectorLM -->|"residual stream layer 19"| SAE
-    SAE -->|"feature activations"| Policy
-    Policy -->|"compare vs YAML rules"| Decision
-    Decision -->|"advisory verdict"| Host
-```
+<div align="center">
+  <img src="docs/architecture.png" alt="saegate architecture" width="840">
+</div>
 
 ---
 
@@ -271,3 +253,4 @@ If you build on saegate, please cite the repo:
 
 Standing on the shoulders of SAELens, TransformerLens, Goodfire's open SAE
 releases, and Anthropic's MCP spec.
+

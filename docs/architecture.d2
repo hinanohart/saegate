@@ -1,0 +1,40 @@
+direction: down
+explanation: |md
+  ### saegate
+  **An advisory MCP gate that probes coding-agent tool-calls via a Llama-3.1-8B SAE inspector — observation only, fail-closed escalate, sandbox required.**
+| {near: top-center}
+
+agent: "① Coding Agent\nClaude Code / Cursor / OpenHands" {shape: oval; style: {fill: "#6366f1"; font-color: "#ffffff"; stroke: "#4338ca"; bold: true; font-size: 18}}
+mcp: "② MCP Server\nsaegate serve" {style: {fill: "#0ea5e9"; font-color: "#ffffff"; stroke: "#0369a1"; bold: true; font-size: 17}}
+gate: "③ Gate\ngate.py" {style: {fill: "#0ea5e9"; font-color: "#ffffff"; stroke: "#0369a1"; bold: true; font-size: 17}}
+
+agent -> mcp: "① gate_check(tool_name, args, draft)"
+mcp -> gate: "② dispatch"
+
+inspector: "SAE Inspection Stack" {
+  style: {fill: "#fffbeb"; stroke: "#f59e0b"; font-color: "#92400e"; bold: true; font-size: 16}
+  probe: "Probe\nprobe.py"
+  llm: "⑤ Inspector LM\nLlama-3.1-8B-Instruct"
+  sae: "Sparse Autoencoder\nGoodfire SAE l19"
+  *.style.fill: "#fef3c7"; *.style.font-color: "#92400e"
+}
+
+gate -> inspector.probe: "④ render_inspector_prompt"
+inspector.probe -> inspector.llm: "⑤ prompt"
+inspector.llm -> inspector.sae: "residual stream layer 19"
+
+policy: "⑥ Policy Evaluator\npolicy.py\ncompare vs YAML rules" {style: {fill: "#dcfce7"; font-color: "#065f46"; bold: true; font-size: 15}}
+inspector.sae -> policy: "⑥ feature activations"
+
+decision: "⑦ Decision\nallow / escalate / deny" {style: {fill: "#dcfce7"; font-color: "#065f46"; bold: true; font-size: 15}}
+policy -> decision: "⑦ evaluate"
+
+host: "⑦ Host Action\nenforces or escalates" {shape: cylinder; style: {fill: "#fdf2f8"; stroke: "#ec4899"; font-color: "#9d174e"; bold: true; font-size: 15}}
+decision -> host: "⑦ advisory verdict"
+
+legend: "Legend" {
+  near: bottom-center
+  style: {fill: "#f8fafc"; stroke: "#cbd5e1"; font-size: 13}
+  e: "● entry"; c: "● core"; p: "● processing"; b: "● external"; d: "● output"
+  e.style.font-color: "#4338ca"; c.style.font-color: "#0369a1"; p.style.font-color: "#10b981"; b.style.font-color: "#f59e0b"; d.style.font-color: "#ec4899"
+}
