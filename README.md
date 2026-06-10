@@ -16,15 +16,15 @@
 
 ```mermaid
 flowchart TD
-    Agent["Coding Agent\nClaude Code / Cursor / OpenHands"]
-    MCP["MCP Server\nsaegate serve"]
-    Gate["Gate\ngate.py"]
-    Probe["SAE Probe\nprobe.py"]
-    InspectorLM["Inspector LM\nLlama-3.1-8B-Instruct"]
-    SAE["Sparse Autoencoder\nGoodfire SAE l19"]
-    Policy["Policy Evaluator\npolicy.py"]
-    Decision["Decision\nallow / escalate / deny"]
-    Host["Host Action\nHost enforces or escalates"]
+    Agent["Coding Agent<br>Claude Code / Cursor / OpenHands"]
+    MCP["MCP Server<br>saegate serve"]
+    Gate["Gate<br>gate.py"]
+    Probe["SAE Probe<br>probe.py"]
+    InspectorLM["Inspector LM<br>Llama-3.1-8B-Instruct"]
+    SAE["Sparse Autoencoder<br>Goodfire SAE l19"]
+    Policy["Policy Evaluator<br>policy.py"]
+    Decision["Decision<br>allow / escalate / deny"]
+    Host["Host Action<br>Host enforces or escalates"]
 
     Agent -->|"gate_check(tool_name, args, draft)"| MCP
     MCP --> Gate
