@@ -8,6 +8,36 @@
 
 ---
 
+`saegate` is an MCP server that sits between a coding agent (Claude Code, Cursor, OpenHands, aider, …) and its tool-calls. Before the agent executes a tool, it calls `gate_check`; saegate runs the tool-call through a Llama-3.1-8B inspector and reads sparse-autoencoder (SAE) feature activations at layer 19. Those activations are compared against a user-supplied YAML policy. The gate returns `allow`, `escalate`, or (only if your policy explicitly opts in) `deny`. The host decides whether to honor the verdict — saegate never enforces anything on its own.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    Agent["Coding Agent\nClaude Code / Cursor / OpenHands"]
+    MCP["MCP Server\nsaegate serve"]
+    Gate["Gate\ngate.py"]
+    Probe["SAE Probe\nprobe.py"]
+    InspectorLM["Inspector LM\nLlama-3.1-8B-Instruct"]
+    SAE["Sparse Autoencoder\nGoodfire SAE l19"]
+    Policy["Policy Evaluator\npolicy.py"]
+    Decision["Decision\nallow / escalate / deny"]
+    Host["Host Action\nHost enforces or escalates"]
+
+    Agent -->|"gate_check(tool_name, args, draft)"| MCP
+    MCP --> Gate
+    Gate -->|"render_inspector_prompt"| Probe
+    Probe --> InspectorLM
+    InspectorLM -->|"residual stream layer 19"| SAE
+    SAE -->|"feature activations"| Policy
+    Policy -->|"compare vs YAML rules"| Decision
+    Decision -->|"advisory verdict"| Host
+```
+
+---
+
 ## What this is
 
 `saegate` is an MCP server that exposes a **`gate_check`** tool. Hosts (Claude
@@ -110,6 +140,16 @@ threshold `0.8`. With the deterministic `MockProbe` they usually return
 `escalate` (sandbox-required default) — the value is the wiring path, not
 the verdict content. Calibrate against real activations before drawing any
 conclusions from a verdict.
+
+## How it works
+
+At runtime the gate follows these steps for each `gate_check` call:
+
+1. **Prompt rendering** — `render_inspector_prompt` wraps the tool name, arguments, and agent draft into a structured XML-framed string safe against control-character injection.
+2. **Probe** — `SAEProbe` (or `MockProbe` in CPU mode) loads `Llama-3.1-8B-Instruct` via TransformerLens, runs a forward pass, and extracts residual-stream activations at layer 19 through the Goodfire SAE. A configurable hard timeout (default 700 ms) applies; any overshoot returns `escalate`.
+3. **Policy evaluation** — `Policy.evaluate` walks the YAML rules, compares each feature's activation value against its threshold, and accumulates `Reason` objects. In `mode: advisory` (default), any `on_trigger: deny` rule is silently promoted to `escalate`.
+4. **Fail-closed** — probe load failure, runtime error, timeout, missing sandbox assertion, empty feature set, or policy config error all resolve to `verdict=ESCALATE`. The gate never silently falls back to `allow`.
+5. **Decision** — a `Decision` object (JSON-serialisable via Pydantic) is returned over MCP stdio. The host reads it and decides what to do.
 
 ## Wiring into a host
 
