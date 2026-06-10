@@ -147,7 +147,7 @@ At runtime the gate follows these steps for each `gate_check` call:
 
 1. **Prompt rendering** — `render_inspector_prompt` wraps the tool name, arguments, and agent draft into a structured XML-framed string safe against control-character injection.
 2. **Probe** — `SAEProbe` (or `MockProbe` in CPU mode) loads `Llama-3.1-8B-Instruct` via TransformerLens, runs a forward pass, and extracts residual-stream activations at layer 19 through the Goodfire SAE. A configurable hard timeout (default 700 ms) applies; any overshoot returns `escalate`.
-3. **Policy evaluation** — `Policy.evaluate` walks the YAML rules, compares each feature's activation value against its threshold, and accumulates `Reason` objects. In `mode: advisory` (default), any `on_trigger: deny` rule is silently promoted to `escalate`.
+3. **Policy evaluation** — `Policy.evaluate` walks the YAML rules, compares each feature's activation value against its threshold, and accumulates `Reason` objects. In `mode: advisory` (default), any `on_trigger: deny` rule is silently demoted to `escalate`.
 4. **Fail-closed** — probe load failure, runtime error, timeout, missing sandbox assertion, empty feature set, or policy config error all resolve to `verdict=ESCALATE`. The gate never silently falls back to `allow`.
 5. **Decision** — a `Decision` object (JSON-serialisable via Pydantic) is returned over MCP stdio. The host reads it and decides what to do.
 
