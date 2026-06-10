@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/hinanohart/saegate/actions/workflows/ci.yml/badge.svg)](https://github.com/hinanohart/saegate/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11–3.12](https://img.shields.io/badge/python-3.11--3.12-blue.svg)](https://www.python.org/downloads/)
 
 ---
 
@@ -87,7 +87,7 @@ on its own.
 `v0.0.1` Phase 0 scaffold (2026-05-23):
 
 - Schemas, gate, policy, mock probe, MCP stdio server, CLI — all working CPU-only.
-- 28 pytest tests covering allow / escalate / fail-closed (load /
+- 32 pytest tests covering allow / escalate / fail-closed (load /
   runtime / timeout) / sandbox / JSON round-trip / policy validation /
   telemetry / latency overhead / MCP roundtrip / prompt-injection escape.
 - Honest-marketing gate + secret-pattern gate + ruff/format CI.
